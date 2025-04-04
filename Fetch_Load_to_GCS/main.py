@@ -6,8 +6,13 @@ from flask import jsonify
 from google.cloud import storage
 # from Riot.function import get_match_ids, get_match_data
 import requests
-from secret import RIOTAPIKEY
+import os
+from dotenv import load_dotenv
 import logging
+
+load_dotenv()
+
+RIOTAPIKEY = os.getenv("RIOT_API_KEY")
 
 logging.basicConfig(level=logging.INFO)
 
