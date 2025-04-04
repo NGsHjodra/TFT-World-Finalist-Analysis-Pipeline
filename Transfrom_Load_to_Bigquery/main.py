@@ -36,12 +36,11 @@ def load_transformed_data(bucket_name, folder_path, project_id, bq_table):
     blobs = bucket.list_blobs(prefix=f"{folder_path}/raw_matches/")
 
     for blob in blobs:
-        raw_bytes = blob.download_as_string()
-
+        logger.info(f"Processing blob: {blob.name}")
         try:
-            content = raw_bytes.decode("utf-8")
-        except UnicodeDecodeError as e:
-            logger.error(f"Could not decode blob {blob.name}: {e}")
+            content = blob.download_as_string().decode("utf-8")
+        except Exception as e:
+            logger.error(f"Failed to download or decode {blob.name}: {e}")
             continue
 
         if not content.strip():
@@ -54,19 +53,32 @@ def load_transformed_data(bucket_name, folder_path, project_id, bq_table):
             logger.error(f"{blob.name} is not valid JSON: {e}")
             continue
 
-        match_id = match_data["metadata"]["match_id"]
-        game_datetime = match_data["info"]["game_datetime"]
-        game_version = match_data["info"]["game_version"]
+        try:
+            match_id = match_data["metadata"]["match_id"]
+            game_datetime = match_data["info"]["game_datetime"]
+            game_version = match_data["info"]["game_version"]
 
-        for participant in match_data["info"]["participants"]:
-            flat_row = flatten_participant(match_id, game_datetime, game_version, participant)
-            rows_to_insert.append(flat_row)
+            for participant in match_data["info"]["participants"]:
+                flat_row = flatten_participant(match_id, game_datetime, game_version, participant)
+                rows_to_insert.append(flat_row)
 
-    job = bq.insert_rows_json(bq_table, rows_to_insert)
-    if job:
-        logger.error(f"Error loading data into BigQuery: {job}")
-    else:
-        logger.info(f"Successfully loaded {len(rows_to_insert)} rows into {bq_table}")
+        except Exception as e:
+            logger.error(f"Failed to extract fields from {blob.name}: {e}")
+            continue
+
+    if not rows_to_insert:
+        logger.warning("No rows to insert into BigQuery.")
+        return
+
+    try:
+        job = bq.insert_rows_json(bq_table, rows_to_insert)
+        if job:
+            logger.error(f"BigQuery insert errors: {job}")
+        else:
+            logger.info(f"Successfully loaded {len(rows_to_insert)} rows into {bq_table}")
+    except Exception as e:
+        logger.error(f"BigQuery insertion failed: {e}")
+
 
 @functions_framework.cloud_event
 def main(cloud_event):
@@ -78,7 +90,7 @@ def main(cloud_event):
         project_id = "primeval-proton-449808-i6"
         bucket_name = "really_not_a_bucket"
         folder_path = "TFT"
-        bq_table = "primeval-proton-449808-i6.tft_dataset.match_participants"
+        bq_table = "primeval-proton-449808-i6.TFT_dataset.match_participants"
         load_transformed_data(bucket_name, folder_path, project_id, bq_table)
         return jsonify({"status": "success"}), 200
     except Exception as e:
