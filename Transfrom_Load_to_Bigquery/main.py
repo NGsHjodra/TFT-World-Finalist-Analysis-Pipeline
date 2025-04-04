@@ -36,19 +36,24 @@ def load_transformed_data(bucket_name, folder_path, project_id, bq_table):
     blobs = bucket.list_blobs(prefix=f"{folder_path}/raw_matches/")
 
     for blob in blobs:
-        content = blob.download_as_string()
+        raw_bytes = blob.download_as_string()
+
+        try:
+            content = raw_bytes.decode("utf-8")
+        except UnicodeDecodeError as e:
+            logger.error(f"Could not decode blob {blob.name}: {e}")
+            continue
 
         if not content.strip():
-            logger.warning(f"empty. Skipping.")
-            return
+            logger.warning(f"{blob.name} is empty. Skipping.")
+            continue
 
         try:
             match_data = json.loads(content)
         except json.JSONDecodeError as e:
-            logger.error(f"not valid JSON: {e}")
-            return
+            logger.error(f"{blob.name} is not valid JSON: {e}")
+            continue
 
-        match_data = json.loads(blob.download_as_string())
         match_id = match_data["metadata"]["match_id"]
         game_datetime = match_data["info"]["game_datetime"]
         game_version = match_data["info"]["game_version"]
