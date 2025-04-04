@@ -72,7 +72,7 @@ async def process_match_data(player_list, bucket_name, destination_folder, proje
                 try:
                     match_data = await get_match_data(match_id)
                     if match_data:
-                        save_to_gcs(match_data, bucket_name, destination_folder, match_id)
+                        save_to_gcs(match_data, bucket_name, destination_folder, match_id, project_id)
                     else:
                         logger.error(f"Failed to fetch match data for {match_id}")
                 except Exception as e:
