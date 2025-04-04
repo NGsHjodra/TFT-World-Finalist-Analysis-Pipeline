@@ -58,10 +58,10 @@ def main(cloud_event):
     logger.info(f"Cloud Event Data: {cloud_event.data}")
     try:
         data = cloud_event.data
-        project_id = data["project_id"]
-        bucket_name = data["bucket_name"]
-        folder_path = data["folder_path"]
-        bq_table = data["bq_table"]
+        project_id = "primeval-proton-449808-i6"
+        bucket_name = "really_not_a_bucket"
+        folder_path = "TFT"
+        bq_table = "primeval-proton-449808-i6.tft_dataset.match_participants"
         load_transformed_data(bucket_name, folder_path, project_id, bq_table)
         return jsonify({"status": "success"}), 200
     except Exception as e:
