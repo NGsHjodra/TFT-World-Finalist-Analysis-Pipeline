@@ -1,0 +1,42 @@
+steps:
+  # Build EL container (TFT Extract to GCS)
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/tft-extract-to-gcs', './Fetch_Load_to_GCS']
+
+  # Push EL container
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/tft-extract-to-gcs']
+
+  # Deploy EL to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args: [
+      'run', 'deploy', 'tft-extract-to-gcs',
+      '--image', 'gcr.io/$PROJECT_ID/tft-extract-to-gcs',
+      '--region', 'asia-southeast1',
+      '--platform', 'managed',
+      '--allow-unauthenticated'
+    ]
+
+  # Build TL container (TFT GCS to BigQuery)
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/tft-gcs-to-bigquery', './Transform_Load_to_Bigquery']
+
+  # Push TL container
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/tft-gcs-to-bigquery']
+
+  # Deploy TL to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args: [
+      'run', 'deploy', 'tft-gcs-to-bigquery',
+      '--image', 'gcr.io/$PROJECT_ID/tft-gcs-to-bigquery',
+      '--region', 'asia-southeast1',
+      '--platform', 'managed',
+      '--no-allow-unauthenticated'
+    ]
+
+images:
+  - 'gcr.io/$PROJECT_ID/tft-extract-to-gcs'
+  - 'gcr.io/$PROJECT_ID/tft-gcs-to-bigquery'

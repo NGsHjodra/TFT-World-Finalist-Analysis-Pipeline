@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+*.db
+.git
+.gitignore
+README.md
+.DS_Store
+.vscode/
+.venv
+playground.py
+cloudbuild.yaml
