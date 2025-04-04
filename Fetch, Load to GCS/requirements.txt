@@ -1,0 +1,6 @@
+google-cloud-storage
+PyYAML
+aiohttp
+functions-framework
+requests
+flask
