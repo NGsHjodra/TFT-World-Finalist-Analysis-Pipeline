@@ -11,6 +11,28 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def flatten_participant(match_id, game_datetime, game_version, participant):
+    # Ensure correct transformation of traits
+    transformed_traits = []
+    for trait in participant.get("traits", []):
+        transformed_traits.append({
+            "name": trait.get("name"),
+            "num_units": trait.get("num_units"),
+            "style": trait.get("style"),
+            "tier_current": trait.get("tier_current"),
+            "tier_total": trait.get("tier_total")
+        })
+
+    # Ensure correct transformation of units
+    transformed_units = []
+    for unit in participant.get("units", []):
+        transformed_units.append({
+            "character_id": unit.get("character_id"),
+            "itemNames": unit.get("itemNames", []),  # Must be a list!
+            "name": unit.get("name"),
+            "rarity": unit.get("rarity"),
+            "tier": unit.get("tier")
+        })
+
     return {
         "match_id": match_id,
         "puuid": participant["puuid"],
@@ -19,11 +41,12 @@ def flatten_participant(match_id, game_datetime, game_version, participant):
         "gold_left": participant["gold_left"],
         "last_round": participant["last_round"],
         "augments": participant.get("augments", []),
-        "traits": participant.get("traits", []),
-        "units": participant.get("units", []),
+        "traits": transformed_traits,
+        "units": transformed_units,
         "game_version": game_version,
         "game_datetime": datetime.fromtimestamp(game_datetime / 1000).isoformat()
     }
+
 
 def load_transformed_data(bucket_name, folder_path, project_id, bq_table):
     logger.info(f"Loading data from GCS bucket: {bucket_name}, folder: {folder_path}")
