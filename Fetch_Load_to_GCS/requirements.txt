@@ -4,3 +4,4 @@ aiohttp
 functions-framework
 requests
 flask
+python-dotenv
