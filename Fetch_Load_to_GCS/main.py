@@ -4,12 +4,30 @@ import yaml
 import json
 from flask import jsonify
 from google.cloud import storage
-from Riot.function import get_match_ids, get_match_data
+# from Riot.function import get_match_ids, get_match_data
+import requests
+from secret import RIOTAPIKEY
 import logging
 
 logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger(__name__)
+
+async def get_match_ids(puuid):
+    summoner_url = f"https://sea.api.riotgames.com/tft/match/v1/matches/by-puuid/{puuid}/ids?start=0&count=20&api_key={RIOTAPIKEY}"
+    match_ids = requests.get(summoner_url)
+    if match_ids.status_code == 200:
+        return match_ids.json()
+    else:
+        return None
+    
+async def get_match_data(match_id):
+    summoner_url = f"https://sea.api.riotgames.com/tft/match/v1/matches/{match_id}?api_key={RIOTAPIKEY}"
+    match_data = requests.get(summoner_url)
+    if match_data.status_code == 200:
+        return match_data.json()
+    else:
+        return None
 
 def match_exists_in_gcs(bucket_name, folder, match_id, project_id):
     client = storage.Client(project=project_id)
