@@ -1,6 +1,6 @@
 import functions_framework
 import asyncio
-import yaml
+# import yaml
 import json
 from flask import jsonify
 from google.cloud import storage
@@ -17,6 +17,21 @@ RIOTAPIKEY = os.getenv("RIOT_API_KEY")
 logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger(__name__)
+
+player_list = [
+    ["Dishsoap", "NA2", "NA", "GDtO4yJ1GG0b4C4S2zxqxUhdcPju_rmtGnsVVzNdvbOG0XRrh2bo2g3ekCC-eyXJVNC9B8kKkXe33g"],
+    ["M8 Jedusor", "12345", "EUW", "kOsBya31_nrnKb4zXBoXJa9IKnMz9JIa8i_Dyxf6bMvXy5GzuFYDoxtiVrtWMpAV1CKLOjQf4fkkgQ"],
+    ["eusouolucas", "1111", "BR1", "w8vSvHzPK4lcrlnqQWlQ2JNH36xqf0CIbHhBYV-n-H8x2gtwC8djiK1stYmFgfTh8sXSCNfrLKOnXw"],
+    ["Deis1k", "EUW", "EUW", "Nc13EOew5HOm8epkuLLehYTMHEwP0QIWVH1MWWwloCqAozwfZi1vuRxWCwPxEHIgvDPf6IvT-ZumxA"],
+    ["Só bio", "BR1", "BR", "F35MREp64IcD2bSekqk89rON6qkzdD_BnEEL7T5XBn4ZYC7JzzwQrd-tOb1dKf2kEzjSOxNrkpTJlg"],
+    ["VIT prestivent", "123", "NA", "XXSIWM79xLgJeyY0bn8bFnDBC1vcqZJVr6l2UUX9pyqFgQzyc3Xiw184sLGatcXJE25ZfQdN1AC3cg"],
+    ["RCS Xperion", "EUW11", "EUW", "o3OEd_6rmOKd1HqpFksDtihgpgy1JNXOx8DI7kO5HrJf-LLsKFadRDnT5fDRM2IbhccbL37w7pTkVQ"],
+    ["MIH TarteMan", "EUW", "EUW", "vY0cq71fLXi9sQbTZjkDzeWacza-Ku3Y-1K8poEx5QsfhptbtnR7llzjYjh-MJfWdlVWodrY3fNhRA"],
+    # ["강선종", "KR123", "KR", "Error fetching riot id: 404"],
+    ["Boomhae", "0901", "SEA", "cXgVs5Lha9SqCMQb65Kuum9Uk7-WizwffHyslrnRRAcYGI0qlG9smSeyKAWnd_V6b1p4nF1JpqPnuw"],
+    ["빈 칠", "123", "KR", "WZoTjjJHQNgWjO4aydENeJT9Euo1VFSv-o00YWcesFCu1_EV8FUzjFVTeMm9BAi5o1RQS00yIadDlA"],
+    ["META SpencerTFT", "TFT", "NA", "CzOmt0D3kLzljvMUZ8_VqSnHU1HdqSw3qzsL1R7GZchfEwcLWOeRLzctXRTL82a4jwRTX_dJjHaN1g"]
+]
 
 async def get_match_ids(puuid):
     summoner_url = f"https://sea.api.riotgames.com/tft/match/v1/matches/by-puuid/{puuid}/ids?start=0&count=20&api_key={RIOTAPIKEY}"
@@ -86,10 +101,6 @@ def main(request):
         project_id = data.get("project_id")
         bucket_name = data.get("bucket_name")
         destination_folder = data.get("destination_folder", "TFT")
-
-        #read player_list from yaml file
-        with open("config/player_list.yaml", "r") as file:
-            player_list = yaml.safe_load(file)
 
         logger.info(f"Player list: {player_list}")
 
