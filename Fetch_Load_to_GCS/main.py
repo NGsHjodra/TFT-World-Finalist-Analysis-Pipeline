@@ -45,7 +45,7 @@ async def get_match_ids(puuid, server):
     elif server == "KR":
         region = "asia"
     
-    summoner_url = f"https://{region}.api.riotgames.com/tft/match/v1/matches/by-puuid/{puuid}/ids?start=0&count=20&api_key={secret.RIOTAPIKEY}"
+    summoner_url = f"https://{region}.api.riotgames.com/tft/match/v1/matches/by-puuid/{puuid}/ids?start=0&count=20&api_key={RIOTAPIKEY}"
     try:
         match_ids = requests.get(summoner_url)
     except requests.exceptions.RequestException as e:
@@ -58,7 +58,7 @@ async def get_match_ids(puuid, server):
         return None
     
 async def get_match_data(match_id, region):
-    summoner_url = f"https://{region}.api.riotgames.com/tft/match/v1/matches/{match_id}?api_key={secret.RIOTAPIKEY}"
+    summoner_url = f"https://{region}.api.riotgames.com/tft/match/v1/matches/{match_id}?api_key={RIOTAPIKEY}"
     match_data = requests.get(summoner_url)
     if match_data.status_code == 200:
         return match_data.json()
