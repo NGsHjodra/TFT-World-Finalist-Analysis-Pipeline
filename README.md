@@ -57,6 +57,7 @@ This project is an end-to-end **Data Engineering Pipeline** built on **Google Cl
 Traits and units are structured as nested objects for flexible querying.
 But you can also flatten them more if you prefer a more traditional schema.
 With the current schema, you can easily query for trait usage and item distribution.
+Sceduling those queries in BigQuery will allow you to analyze the data over time.
 
 ## 🚀 Deployment
 
