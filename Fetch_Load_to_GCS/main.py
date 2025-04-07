@@ -33,16 +33,32 @@ player_list = [
     ["META SpencerTFT", "TFT", "NA", "CzOmt0D3kLzljvMUZ8_VqSnHU1HdqSw3qzsL1R7GZchfEwcLWOeRLzctXRTL82a4jwRTX_dJjHaN1g"]
 ]
 
-async def get_match_ids(puuid):
-    summoner_url = f"https://sea.api.riotgames.com/tft/match/v1/matches/by-puuid/{puuid}/ids?start=0&count=20&api_key={RIOTAPIKEY}"
-    match_ids = requests.get(summoner_url)
+async def get_match_ids(puuid, server):
+
+    region = ""
+    if server == "SEA":
+        region = "sea"
+    elif server in ["NA", "BR"]:
+        region = "americas"
+    elif server == "EUW":
+        region = "europe"
+    elif server == "KR":
+        region = "asia"
+    
+    summoner_url = f"https://{region}.api.riotgames.com/tft/match/v1/matches/by-puuid/{puuid}/ids?start=0&count=20&api_key={secret.RIOTAPIKEY}"
+    try:
+        match_ids = requests.get(summoner_url)
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching match IDs: {e}")
+        print("Url:", summoner_url)
+        return None
     if match_ids.status_code == 200:
-        return match_ids.json()
+        return match_ids.json(), region
     else:
         return None
     
-async def get_match_data(match_id):
-    summoner_url = f"https://sea.api.riotgames.com/tft/match/v1/matches/{match_id}?api_key={RIOTAPIKEY}"
+async def get_match_data(match_id, region):
+    summoner_url = f"https://{region}.api.riotgames.com/tft/match/v1/matches/{match_id}?api_key={secret.RIOTAPIKEY}"
     match_data = requests.get(summoner_url)
     if match_data.status_code == 200:
         return match_data.json()
@@ -57,9 +73,10 @@ def match_exists_in_gcs(bucket_name, folder, match_id, project_id):
 
 async def process_match_data(player_list, bucket_name, destination_folder, project_id):
     for player in player_list:
+        server = player[2]
         puuid = player[3]
         logger.info(f"Fetching match IDs for {player[0]}")
-        match_ids = await get_match_ids(puuid)
+        match_ids, region = await get_match_ids(puuid, server)
         if match_ids:
             logger.info(f"Match IDs for {player[0]}: {match_ids}")
             for match_id in match_ids:
@@ -70,7 +87,7 @@ async def process_match_data(player_list, bucket_name, destination_folder, proje
                     continue
                 # Fetch match data
                 try:
-                    match_data = await get_match_data(match_id)
+                    match_data = await get_match_data(match_id, region)
                     if match_data:
                         save_to_gcs(match_data, bucket_name, destination_folder, match_id, project_id)
                     else:
