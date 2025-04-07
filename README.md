@@ -92,6 +92,10 @@ With the current schema, you can easily query for trait usage and item distribut
 └── README.md              # You are here
 ```
 
+## Dashboard
+
+[Looker Studio Dashboard](https://lookerstudio.google.com/reporting/dcf3c12e-c020-4654-bdfa-48984bdd15c5)
+
 ---
 
 ## 📊 Current Issues and Future Work
