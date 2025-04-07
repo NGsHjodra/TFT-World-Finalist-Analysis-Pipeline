@@ -1,11 +1,8 @@
-Absolutely! Here's a polished `README.md` tailored to your **TFT World Finalist Analysis Pipeline** using GCP:
-
----
-
-```markdown
 # TFT World Finalist Analysis Pipeline
 
 This project is an end-to-end **Data Engineering Pipeline** built on **Google Cloud Platform (GCP)** to analyze **Teamfight Tactics (TFT)** match data from **world finalists**. The pipeline focuses on **trait usage, item distribution, and meta analysis** to uncover strategic insights at the highest level of play.
+
+\*world finalists with some world participants
 
 ---
 
@@ -40,7 +37,7 @@ This project is an end-to-end **Data Engineering Pipeline** built on **Google Cl
 
 ---
 
-## 💾 BigQuery Schema (Simplified)
+## 💾 BigQuery Schema
 
 | Field           | Type             |
 |----------------|------------------|
@@ -56,7 +53,8 @@ This project is an end-to-end **Data Engineering Pipeline** built on **Google Cl
 | game_datetime  | TIMESTAMP        |
 
 Traits and units are structured as nested objects for flexible querying.
-
+But you can also flatten them more if you prefer a more traditional schema.
+With the current schema, you can easily query for trait usage and item distribution.
 ---
 
 ## 🚀 Deployment
@@ -66,7 +64,6 @@ Traits and units are structured as nested objects for flexible querying.
   - Cloud Run
   - BigQuery
   - Cloud Scheduler
-  - Pub/Sub
   - IAM Service Accounts
 - Docker
 - Riot API Key
@@ -87,8 +84,8 @@ Traits and units are structured as nested objects for flexible querying.
 ```
 .
 ├── config/                 # YAML config (e.g. finalist PUUID list)
-├── EL/                    # Extract & Load Cloud Run function
-├── TL/                    # Transform & Load Cloud Run function
+├── Fetch_Load_to_GCS/                    # Extract & Load Cloud Run function
+├── Transform_Load_to_Bigquery/                    # Transform & Load Cloud Run function
 ├── Dockerfile             # Container spec
 ├── cloudbuild.yaml        # CI/CD config
 ├── requirements.txt       # Python dependencies
@@ -97,9 +94,10 @@ Traits and units are structured as nested objects for flexible querying.
 
 ---
 
-## 📊 Future Work
+## 📊 Current Issues and Future Work
 
-- Build a Looker Studio dashboard (or alternative)
-- Add deduplication logic in BigQuery
-- Expand data model: track augments, item slots, unit tiers, etc.
-- Enable dataset refresh (re-ingest and re-transform)
+- **Current Issues**:
+  - GCP cloud run function somehow can't access outside folder files (e.g. player.yaml) [currently hardcoded]
+
+- **Future Work**:
+  - Add more data sources (e.g. player stats)
