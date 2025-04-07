@@ -52,10 +52,11 @@ This project is an end-to-end **Data Engineering Pipeline** built on **Google Cl
 | game_version   | STRING           |
 | game_datetime  | TIMESTAMP        |
 
+---
+
 Traits and units are structured as nested objects for flexible querying.
 But you can also flatten them more if you prefer a more traditional schema.
 With the current schema, you can easily query for trait usage and item distribution.
----
 
 ## 🚀 Deployment
 
@@ -102,6 +103,6 @@ With the current schema, you can easily query for trait usage and item distribut
 
 - **Current Issues**:
   - GCP cloud run function somehow can't access outside folder files (e.g. player.yaml) [currently hardcoded]
-
+  - No mapping for puuid to player name
 - **Future Work**:
   - Add more data sources (e.g. player stats)
