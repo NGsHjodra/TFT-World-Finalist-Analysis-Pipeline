@@ -50,7 +50,8 @@ async def get_match_ids(puuid, server):
 
     summoner_url = f"https://{region}.api.riotgames.com/tft/match/v1/matches/by-puuid/{puuid}/ids?start=0&count=20&api_key={RIOTAPIKEY}"
 
-    logger.info(f"Fetching match IDs from {summoner_url}")
+    # this should not log the url, It's containing the api key
+    # logger.info(f"Fetching match IDs from {summoner_url}")
     try:
         match_ids = requests.get(summoner_url)
     except requests.exceptions.RequestException as e:
