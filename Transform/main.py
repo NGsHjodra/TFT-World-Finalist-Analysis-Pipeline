@@ -32,18 +32,8 @@ def run_transform_query():
     client = bigquery.Client()
     query = """
     INSERT INTO `phuttimate-temp.TFT_dataset.parsed_participants`
-    SELECT
-    match_id,
-    puuid,
-    placement,
-    level,
-    traits,
-    units,
-    game_version,
-    game_datetime
+    SELECT *
     FROM `phuttimate-temp.TFT_dataset.raw_matches`
-    WHERE SAFE_CAST(placement AS INT64) IS NOT NULL
-
     """
     query_job = client.query(query)
     query_job.result()
