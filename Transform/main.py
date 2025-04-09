@@ -21,6 +21,11 @@ def handle_pubsub():
 
     return "OK", 200
 
+@app.route("/manual", methods=["POST"])
+def manual_trigger():
+    run_transform_query()
+    return "Manual transform complete", 200
+
 def run_transform_query():
     from google.cloud import bigquery
 
