@@ -1,5 +1,5 @@
 import json
-from google.cloud import storage, bigquery
+from google.cloud import storage, bigquery, pubsub_v1
 from datetime import datetime
 import functions_framework
 import logging
@@ -9,19 +9,20 @@ logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
-player_list = [
-    ["Dishsoap", "NA2", "NA", "GDtO4yJ1GG0b4C4S2zxqxUhdcPju_rmtGnsVVzNdvbOG0XRrh2bo2g3ekCC-eyXJVNC9B8kKkXe33g"],
-    ["M8 Jedusor", "12345", "EUW", "kOsBya31_nrnKb4zXBoXJa9IKnMz9JIa8i_Dyxf6bMvXy5GzuFYDoxtiVrtWMpAV1CKLOjQf4fkkgQ"],
-    ["eusouolucas", "1111", "BR", "w8vSvHzPK4lcrlnqQWlQ2JNH36xqf0CIbHhBYV-n-H8x2gtwC8djiK1stYmFgfTh8sXSCNfrLKOnXw"],
-    ["Deis1k", "EUW", "EUW", "Nc13EOew5HOm8epkuLLehYTMHEwP0QIWVH1MWWwloCqAozwfZi1vuRxWCwPxEHIgvDPf6IvT-ZumxA"],
-    ["Só bio", "BR1", "BR", "F35MREp64IcD2bSekqk89rON6qkzdD_BnEEL7T5XBn4ZYC7JzzwQrd-tOb1dKf2kEzjSOxNrkpTJlg"],
-    ["VIT prestivent", "123", "NA", "XXSIWM79xLgJeyY0bn8bFnDBC1vcqZJVr6l2UUX9pyqFgQzyc3Xiw184sLGatcXJE25ZfQdN1AC3cg"],
-    ["RCS Xperion", "EUW11", "EUW", "o3OEd_6rmOKd1HqpFksDtihgpgy1JNXOx8DI7kO5HrJf-LLsKFadRDnT5fDRM2IbhccbL37w7pTkVQ"],
-    ["MIH TarteMan", "EUW", "EUW", "vY0cq71fLXi9sQbTZjkDzeWacza-Ku3Y-1K8poEx5QsfhptbtnR7llzjYjh-MJfWdlVWodrY3fNhRA"],
-    ["Boomhae", "0901", "SEA", "cXgVs5Lha9SqCMQb65Kuum9Uk7-WizwffHyslrnRRAcYGI0qlG9smSeyKAWnd_V6b1p4nF1JpqPnuw"],
-    ["빈 칠", "123", "KR", "WZoTjjJHQNgWjO4aydENeJT9Euo1VFSv-o00YWcesFCu1_EV8FUzjFVTeMm9BAi5o1RQS00yIadDlA"],
-    ["META SpencerTFT", "TFT", "NA", "CzOmt0D3kLzljvMUZ8_VqSnHU1HdqSw3qzsL1R7GZchfEwcLWOeRLzctXRTL82a4jwRTX_dJjHaN1g"]
-]
+project_id = "phuttimate-temp"
+topic_id = "bigquery-staging-to-production"
+
+publisher = pubsub_v1.PublisherClient()
+topic_path = publisher.topic_path(project_id, topic_id)
+
+def publish_transform_event():
+    message_data = {
+        "status": "staging_loaded",
+        "trigger": "match_data_ready"
+    }
+    message_json = json.dumps(message_data).encode("utf-8")
+    future = publisher.publish(topic_path, data=message_json)
+    print(f"Published message to {topic_path}: {future.result()}")
 
 def flatten_participant(match_id, game_datetime, game_version, participant):
     # Ensure correct transformation of traits
@@ -123,11 +124,13 @@ def main(cloud_event):
     logger.info(f"Cloud Event Data: {cloud_event.data}")
     try:
         # data = cloud_event.data
-        project_id = "primeval-proton-449808-i6"
-        bucket_name = "really_not_a_bucket"
+        project_id = "phuttimate-temp"
+        bucket_name = "tft_pipeline_bucket"
         folder_path = "TFT"
-        bq_table = "primeval-proton-449808-i6.TFT_dataset.match_participants"
+        bq_table = f"{project_id}.TFT_dataset.raw_matches"
         load_transformed_data(bucket_name, folder_path, project_id, bq_table)
+        publish_transform_event()
+        logger.info("Data loaded successfully and event published.")
         return jsonify({"status": "success"}), 200
     except Exception as e:
         logger.error(f"Error processing cloud event: {e}")
