@@ -79,24 +79,29 @@ async def process_match_data(player_list, bucket_name, destination_folder, proje
         server = player[2]
         puuid = player[3]
         logger.info(f"Fetching match IDs for {player[0]}")
-        match_ids, region = await get_match_ids(puuid, server)
-        if match_ids:
-            logger.info(f"Match IDs for {player[0]}: {match_ids}")
-            for match_id in match_ids:
-                logger.info(f"Fetching match data for {match_id}")
-                # Check if match data already exists in GCS
-                if match_exists_in_gcs(bucket_name, destination_folder, match_id, project_id):
-                    logger.info(f"Match data for {match_id} already exists in GCS. Skipping.")
-                    continue
-                # Fetch match data
-                try:
-                    match_data = await get_match_data(match_id, region)
-                    if match_data:
-                        save_to_gcs(match_data, bucket_name, destination_folder, match_id, project_id)
-                    else:
-                        logger.error(f"Failed to fetch match data for {match_id}")
-                except Exception as e:
-                    logger.error(f"Error fetching match data for {match_id}: {e}")
+        
+        result = await get_match_ids(puuid, server)
+        if not result:
+            logger.warning(f"Could not get match IDs for {player[0]}")
+            continue
+        
+        match_ids, region = result
+        logger.info(f"Match IDs for {player[0]}: {match_ids}")
+        
+        for match_id in match_ids:
+            logger.info(f"Fetching match data for {match_id}")
+            if match_exists_in_gcs(bucket_name, destination_folder, match_id, project_id):
+                logger.info(f"Match data for {match_id} already exists in GCS. Skipping.")
+                continue
+            try:
+                match_data = await get_match_data(match_id, region)
+                if match_data:
+                    save_to_gcs(match_data, bucket_name, destination_folder, match_id, project_id)
+                else:
+                    logger.error(f"Failed to fetch match data for {match_id}")
+            except Exception as e:
+                logger.error(f"Error fetching match data for {match_id}: {e}")
+
 
 def save_to_gcs(match_data, bucket_name, folder, match_id, project_id):
     client = storage.Client(project=project_id)
