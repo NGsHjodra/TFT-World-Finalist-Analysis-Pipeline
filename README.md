@@ -96,7 +96,7 @@ Sceduling those queries in BigQuery will allow you to analyze the data over time
 
 ## Dashboard
 
-[Looker Studio Dashboard](https://lookerstudio.google.com/reporting/dcf3c12e-c020-4654-bdfa-48984bdd15c5)
+[Looker Studio Dashboard](https://lookerstudio.google.com/reporting/b5acca32-6286-4697-833f-d6e025e33dca)
 
 ---
 
@@ -104,6 +104,5 @@ Sceduling those queries in BigQuery will allow you to analyze the data over time
 
 - **Current Issues**:
   - GCP cloud run function somehow can't access outside folder files (e.g. player.yaml) [currently hardcoded]
-  - No mapping for puuid to player name
 - **Future Work**:
   - Add more data sources (e.g. player stats)
